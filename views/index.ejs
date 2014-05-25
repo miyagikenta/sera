@@ -44,7 +44,7 @@
 	  
 	  var xpos = (msg.value[i].x * 50) + 500;
 	  var ypos = (msg.value[i].y * -50) + 500;
-	  var angle = (msg.value[i].angle * 180) / Math.PI;
+	  var angle = (msg.value[i].angle * -180) / Math.PI;
 	  delem.style.left = xpos + 'px';
 	  delem.style.top  = ypos + 'px';
 	  delem.style.transform       = "rotate(" + angle + "deg )";
