@@ -71,7 +71,7 @@ io.sockets.on('connection', function(socket){
 
 // 精度
 var iterations = 10;
-var fps = 30;
+var fps = 15;
 var interval;
 
 function doAnim() {
