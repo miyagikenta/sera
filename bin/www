@@ -1,0 +1,97 @@
+#!/usr/bin/env node
+var debug = require('debug')('SampleApp');
+var app = require('../app');
+
+var objCount = 0;
+var objs = [];
+var msgs = [];
+
+app.set('port', process.env.PORT || 3000);
+
+var server = app.listen(app.get('port'), function() {
+  debug('Express server listening on port ' + server.address().port);
+});
+
+// 世界
+var b2d = require("box2d");
+var worldAABB = new b2d.b2AABB();
+worldAABB.lowerBound.Set(-100.0, -100.0);
+worldAABB.upperBound.Set(100.0, 100.0);
+var gravity = new b2d.b2Vec2(0.0, -10.0);
+var doSleep = true;
+var world = new b2d.b2World(worldAABB, gravity, doSleep);
+
+// 地面
+var groundBodyDef = new b2d.b2BodyDef();
+groundBodyDef.position.Set(0.0, -10.0);
+var groundBody = world.CreateBody(groundBodyDef);
+var groundShapeDef = new b2d.b2PolygonDef();
+groundShapeDef.SetAsBox(50.0, 10.0);
+groundBody.CreateShape(groundShapeDef);
+
+// websocket
+var socketIO = require('socket.io');
+var io = socketIO.listen(server);
+io.sockets.on('connection', function(socket){
+  console.log("connection");
+  var dboxDef = new b2d.b2BodyDef();
+  dboxDef.position.Set(0.0, 10.0);
+  var dbox = world.CreateBody(dboxDef);
+  var dboxShapeDef = new b2d.b2PolygonDef();
+  dboxShapeDef.SetAsBox(1.0, 1.0);
+  dboxShapeDef.density = 1.0;
+  dboxShapeDef.friction = 0.3;
+  dboxShapeDef.restitution = 0.7;
+  dbox.CreateShape(dboxShapeDef);
+  dbox.SetMassFromShapes();
+
+  objs[objCount] = dbox;
+  objCount++;
+
+  socket.on('message', function(data){
+    console.log("message");
+    io.sockets.emit('message', {value: data.value});
+  });
+  socket.on('disconnect', function(){
+    console.log("disconnect");
+  });
+});
+
+// 箱
+//var bodyDef = new b2d.b2BodyDef();
+//bodyDef.position.Set(0.0, 10.0);
+//var body = world.CreateBody(bodyDef);
+//var shapeDef = new b2d.b2PolygonDef();
+//shapeDef.SetAsBox(1.0, 1.0);
+//shapeDef.density = 1.0;
+//shapeDef.friction = 0.3;
+//shapeDef.restitution = 0.7;
+//body.CreateShape(shapeDef);
+//body.SetMassFromShapes();
+
+// 精度
+var iterations = 10;
+var fps = 30;
+var interval;
+
+function doAnim() {
+  interval = setInterval(function() {
+    world.Step(1.0/fps, iterations);
+//    var position = body.GetPosition();
+//    var angle = body.GetAngle();
+//    var xya = {x:position.x, y:+position.y, angle:angle}; 
+//    io.sockets.emit('message', {value: xya});
+    for(var i in objs){
+//	  console.log(i);
+//	  console.log(objs[i]);
+	  var position = objs[i].GetPosition();
+      var angle = objs[i].GetAngle();
+	  var xya = {x:position.x, y:+position.y, angle:angle};
+	  msgs[i] = xya;
+	}
+//    io.sockets.emit('message', {value: objs});
+    io.sockets.emit('message', {value: msgs});
+//    console.log("x:"+position.x+", y:"+position.y+", angle:"+angle);
+  }, 1000/fps);
+}
+doAnim();

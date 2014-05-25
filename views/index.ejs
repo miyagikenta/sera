@@ -1,0 +1,80 @@
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+  var socket = io.connect('http://localhost:3000');
+  socket.on('connect', function(msg){
+    console.log("connect");
+  });
+  
+  socket.on('message', function(msg){
+//    console.log(msg);
+//    document.getElementById("pos_x").innerHTML = msg.value.x;
+//    document.getElementById("pos_y").innerHTML = msg.value.y;
+//    document.getElementById("angle").innerHTML = msg.value.angle;
+	
+//	var xpos = (msg.value.x * 100) + 500;
+//	var ypos = (msg.value.y * -100) + 500;
+//	var angle = (msg.value.angle * 180) / Math.PI;
+	
+//	var dbox = document.getElementById("dbox");
+//	dbox.style.left = xpos + 'px';
+//	dbox.style.top  = ypos + 'px';
+//	dbox.style.transform       = "rotate(" + angle + "deg )";
+//	dbox.style.webkitTransform = "rotate(" + angle + "deg )";
+//	dbox.style.MozTransform    = "rotate(" + angle + "deg )";
+//	dbox.style.msTransform     = "rotate(" + angle + "deg )";
+//	dbox.style.OTransform      = "rotate(" + angle + "deg )";
+    for(var i in msg.value){
+	  console.log(msg.value[i]);
+	  var dobj = msg.value[i];
+	  var delem = document.getElementById("dbox_" + i);
+	  
+	  if(delem){
+	    console.log(delem);
+	  }else{
+	    console.log(delem);
+		var canvas = document.getElementById("canvas");
+		delem = document.createElement('div');
+		delem.id = "dbox_" + i;
+		delem.style.width = '100px';
+		delem.style.height = '100px';
+		delem.style.position = 'absolute';
+		delem.style.backgroundColor = 'black';
+		canvas.appendChild(delem);
+	  }
+	  
+	  var xpos = (msg.value[i].x * 50) + 500;
+	  var ypos = (msg.value[i].y * -50) + 500;
+	  var angle = (msg.value[i].angle * 180) / Math.PI;
+	  delem.style.left = xpos + 'px';
+	  delem.style.top  = ypos + 'px';
+	  delem.style.transform       = "rotate(" + angle + "deg )";
+	  delem.style.webkitTransform = "rotate(" + angle + "deg )";
+	  delem.style.MozTransform    = "rotate(" + angle + "deg )";
+	  delem.style.msTransform     = "rotate(" + angle + "deg )";
+	  delem.style.OTransform      = "rotate(" + angle + "deg )";
+	}
+  });
+
+  function SendMsg(){
+    var msg;
+	socket.emit('message', {value: msg});
+  }
+</script>
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+<!--    <h1><%= title %></h1> -->
+<!--    <p>Welcome to <%= title %></p> -->
+    <h1>サンプル</h1>
+    <div><span>x:</span><span id="pos_x"></span></div>
+	<div><span>y:</span><span id="pos_y"></span></div>
+	<div><span>angle:</span><span id="angle"></span></div>
+	<div id="canvas"></div>
+<!--	<div id="dbox" style='width:100; height:100; position:absolute; background:black;'></div> -->
+  </body>
+</html>
